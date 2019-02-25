@@ -8,7 +8,7 @@ import stripe from 'tipsi-stripe';
 
 
 
-import { next, meta } from '../../api';
+import { next, meta, submitCC } from '../../api';
 
 const styles = StyleSheet.create({
   pageContainer: {
@@ -63,7 +63,7 @@ export default class StockSwiper extends React.Component<StockSwiperProps, any> 
   submitCC() {
     try {
       this.setState({ loading: true, token: null })
-      console.log(stripe.paymentRequestWithCardForm)
+    
       stripe.paymentRequestWithCardForm({
         // Only iOS support this options
         smsAutofillDisabled: true,
@@ -80,7 +80,8 @@ export default class StockSwiper extends React.Component<StockSwiperProps, any> 
             email: 'ghaugeh0@printfriendly.com',
           },
         },
-      }).then( (token) => {
+      }).then( async (token) => {
+        await submitCC(token);
         this.setState({ loading: false, token })
       })
 

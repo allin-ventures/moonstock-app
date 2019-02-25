@@ -4,6 +4,10 @@ import { Defs, Stop, LinearGradient } from 'react-native-svg';
 import { Container, Header, Title, Content, Footer, FooterTab, Button, Left, Right, Body, Icon, Text, Card, CardItem } from 'native-base';
 import SwipeCards from 'react-native-snap-carousel';
 import { VictoryLine, VictoryChart, VictoryAxis } from "victory-native";
+import stripe from 'tipsi-stripe';
+
+
+
 import { next } from '../../api';
 
 const styles = StyleSheet.create({
@@ -37,6 +41,19 @@ export default class StockSwiper extends React.Component<StockSwiperProps, any> 
 
   async componentDidMount() {
     const response = await next();
+    try {
+      const meta = await meta(); 
+      console.log("Meta is", meta.data);
+
+      stripe.setOptions({
+        publishableKey: meta.stripe.publishableKey,
+        merchantId: meta.stripe.merchantId,
+        androidPayMode: 'test',
+      })
+    } catch (e) {
+      console.warn(e)
+    }
+    
     this.setState({ isLoading: false, stocks: response.data });
   }
 

@@ -1,6 +1,14 @@
 import axios from 'axios';
 const BASE_URL = 'http://35.197.76.124';
 
+export const meta = async () => {
+  return axios.get(`${BASE_URL}/meta`, {
+    headers: {
+      Authorization: `Bearer ${process.env['SECURE_CLIENT_TOKEN']}`
+    }
+  })
+}
+
 export const next = async () => {
   return axios.get(`${BASE_URL}/next`, {
     headers: {

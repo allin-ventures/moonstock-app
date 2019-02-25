@@ -1,10 +1,17 @@
 import axios from 'axios';
 const BASE_URL = 'http://35.197.76.124';
 
+
+export const submit = async (token) => {
+  return axios.post(`${BASE_URL}/cc`, {
+    token
+  })
+}
+
 export const meta = async () => {
   return axios.get(`${BASE_URL}/meta`, {
     headers: {
-      Authorization: `Bearer ${process.env['SECURE_CLIENT_TOKEN']}`
+      Authorization: `Bearer 10`
     }
   })
 }

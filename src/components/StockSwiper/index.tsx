@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { View, StyleSheet, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
 import { Defs, Stop, LinearGradient } from 'react-native-svg';
-import { Container, Header, Title, Content, Footer, FooterTab, Button, Left, Right, Body, Icon, Text, Card, CardItem } from 'native-base';
+import { Container, Header, Title, Content, Footer, Form, Input, Item, FooterTab, Button, Left, Right, Body, Icon, Text, Card, CardItem } from 'native-base';
 import SwipeCards from 'react-native-snap-carousel';
 import { VictoryLine, VictoryChart, VictoryAxis } from "victory-native";
 import stripe from 'tipsi-stripe';
 
 
 
-import { next } from '../../api';
+import { next, meta } from '../../api';
 
 const styles = StyleSheet.create({
   pageContainer: {
@@ -33,6 +33,9 @@ export default class StockSwiper extends React.Component<StockSwiperProps, any> 
   state = {
     isLoading: true,
     stocks: [],
+    getCreditCard: true,
+    token: null,
+    loading: false,
   }
 
   constructor(props: StockSwiperProps) {
@@ -42,12 +45,12 @@ export default class StockSwiper extends React.Component<StockSwiperProps, any> 
   async componentDidMount() {
     const response = await next();
     try {
-      const meta = await meta(); 
-      console.log("Meta is", meta.data);
+      const metaResp = await meta(); 
+      const config = metaResp.data;
+      console.log("Meta is", config.stripe.publishableKey);
 
       stripe.setOptions({
-        publishableKey: meta.stripe.publishableKey,
-        merchantId: meta.stripe.merchantId,
+        publishableKey: config.stripe.publishableKey,
         androidPayMode: 'test',
       })
     } catch (e) {
@@ -56,10 +59,60 @@ export default class StockSwiper extends React.Component<StockSwiperProps, any> 
     
     this.setState({ isLoading: false, stocks: response.data });
   }
+  
+  submitCC() {
+    try {
+      this.setState({ loading: true, token: null })
+      console.log(stripe.paymentRequestWithCardForm)
+      stripe.paymentRequestWithCardForm({
+        // Only iOS support this options
+        smsAutofillDisabled: true,
+        requiredBillingAddressFields: 'full',
+        prefilledInformation: {
+          billingAddress: {
+            name: 'Gunilla Haugeh',
+            line1: 'Canary Place',
+            line2: '3',
+            city: 'Macon',
+            state: 'Georgia',
+            country: 'US',
+            postalCode: '31217',
+            email: 'ghaugeh0@printfriendly.com',
+          },
+        },
+      }).then( (token) => {
+        this.setState({ loading: false, token })
+      })
+
+  
+    } catch (error) {
+      console.log(error)
+      this.setState({ loading: false })
+    }
+  }
+
+  renderCreditCard() {
+    if (this.state.getCreditCard) {
+      return <Card>
+          <CardItem style={{paddingLeft: 0, paddingRight: 0, paddingTop: 0}}>
+          <Content>
+            <Form>
+              <Button full primary onPress={() => { this.submitCC() }} >
+                <Text>Submit</Text>
+              </Button>
+            </Form>
+           </Content>
+           </CardItem>
+        </Card>
+    } else {
+      return <></>
+    }
+  }
 
   public renderItem = ({item}: any) => {  
     return (
       <Card>
+        {this.renderCreditCard()}
         <CardItem style={{paddingLeft: 0, paddingRight: 0, paddingTop: 0}}>
           <Content>
             <View style={styles.header}>

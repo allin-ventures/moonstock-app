@@ -54,7 +54,7 @@ export default class StockSwiper extends React.Component<StockSwiperProps, any> 
             <View pointerEvents="none">
               <VictoryChart domainPadding={{ x : [10, 40] }}>
                 <VictoryLine
-                  animate
+                  //animate={true}
                   style={{
                     data: { stroke: "#c43a31" },
                     parent: { border: "1px solid #ccc"}
